@@ -7,11 +7,13 @@ use std::option::Option;
 //Add Trait for BufReader to read_to_string
 use std::io::prelude::{Read, Write};
 
-fn error(line_num: i8, message: &str){
+mod token;
+
+fn error(line_num: i8, message: &str) {
     report(line_num, "", message);
 }
 
-fn report(line_num: i8, loc: &str, msg: &str){
+fn report(line_num: i8, loc: &str, msg: &str) {
     eprintln!("[line {}] Error {}: {}", line_num, loc, msg);
 }
 
