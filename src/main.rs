@@ -1,3 +1,8 @@
+mod scanner;
+mod token;
+use crate::token::Token;
+
+
 use clap::{App, Arg, ArgMatches};
 use std::fs::File;
 
@@ -7,7 +12,6 @@ use std::option::Option;
 //Add Trait for BufReader to read_to_string
 use std::io::prelude::{Read, Write};
 
-mod token;
 
 fn error(line_num: i8, message: &str) {
     report(line_num, "", message);
@@ -35,6 +39,7 @@ pub fn parse_args() -> ArgMatches<'static> {
 
 /// Interpret the source input
 fn run(src: &str) {
+    let a = Token::new(token::token_type::AND, String::from(""), Some(9), 0);
     src.split_whitespace().for_each(|t| println!("{}", t));
 }
 

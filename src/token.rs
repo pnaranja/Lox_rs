@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 
 #[derive(Debug)]
-enum token_type {
+pub enum token_type {
     // Single-character tokens.
     LEFT_PAREN,
     RIGHT_PAREN,
@@ -53,15 +53,15 @@ enum token_type {
     EOF,
 }
 
-struct Token<T> {
+pub struct Token<T> {
     tok_type: token_type,
     lexeme: String,
-    literal: T,
+    literal: Option<T>, // Tokens might not have literals
     line: i32,
 }
 
 impl<T> Token<T> {
-    fn new(tok_type: token_type, lexeme: String, literal: T, line: i32) -> Token<T> {
+    pub fn new(tok_type: token_type, lexeme: String, literal: Option<T>, line: i32) -> Token<T> {
         Token { tok_type, lexeme, literal, line }
     }
 }
@@ -72,3 +72,4 @@ impl<T> ToString for Token<T>
         format!("{:?} {} {:?}", self.tok_type, self.lexeme, self.literal)
     }
 }
+
