@@ -2,7 +2,7 @@ use crate::token::{Token, token_type, token_type_literal};
 
 pub struct Scanner {
     source: String,
-    tokens: Option<Vec<Token>>,
+    tokens: Vec<Token>,
 
     start_ptr_token : i32,
     current_ptr : i32,
@@ -12,8 +12,8 @@ pub struct Scanner {
 impl Scanner {
     pub fn new(the_source: String) -> Scanner {
          Scanner {
-             source: the_source, 
-             tokens: None,
+             source: the_source,
+             tokens: vec![],
              start_ptr_token: 0,
              current_ptr: 0,
              current_line: 0
@@ -39,5 +39,14 @@ impl Scanner {
              ..self
          }
      }
+
+    /// Return new Scanner with new token
+    fn add_token(self, tok_type: token_type, tok_type_literal: token_type_literal) -> Scanner {
+        let text = &self.source[self.start_ptr_token as usize..self.current_ptr as usize];
+        let mut old_tokens = self.tokens;
+        let mut new_token_vec = vec!(Token::new(tok_type, text.to_string(), Some(tok_type_literal), self.current_line));
+        old_tokens.append(&mut new_token_vec);
+        Scanner { tokens: old_tokens, ..self }
+    }
 
  }
