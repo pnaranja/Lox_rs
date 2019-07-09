@@ -1,16 +1,16 @@
-use crate::token::{Token, token_type};
+use crate::token::{Token, token_type, token_type_literal};
 
-pub struct Scanner<T>{
+pub struct Scanner {
     source: String,
-    tokens : Option<Vec<Token<T>>>,
+    tokens: Option<Vec<Token>>,
 
     start_ptr_token : i32,
     current_ptr : i32,
     current_line : i32
 }
 
-impl <T> Scanner<T>{
-     pub fn new(the_source: String) -> Scanner<T>{
+impl Scanner {
+    pub fn new(the_source: String) -> Scanner {
          Scanner {
              source: the_source, 
              tokens: None,
@@ -33,7 +33,7 @@ impl <T> Scanner<T>{
      }
 
      /// This should just return a new Scanner with the current pointer increased by 1
-     fn advance(self) -> Scanner<T>{
+     fn advance(self) -> Scanner {
          Scanner{
              current_ptr: self.current_ptr+1,
              ..self

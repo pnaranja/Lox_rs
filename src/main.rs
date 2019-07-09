@@ -39,7 +39,7 @@ pub fn parse_args() -> ArgMatches<'static> {
 
 /// Interpret the source input
 fn run(src: &str) {
-    let a = Token::new(token::token_type::AND, String::from(""), Some(9), 0);
+    let a = Token::new(token::token_type::AND, String::from(""), None, 0);
     src.split_whitespace().for_each(|t| println!("{}", t));
 }
 

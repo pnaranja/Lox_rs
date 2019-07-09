@@ -3,6 +3,13 @@
 use std::fmt::Debug;
 
 #[derive(Debug)]
+pub enum token_type_literal {
+    IDENTIFIER,
+    STRING,
+    NUMBER,
+}
+
+#[derive(Debug)]
 pub enum token_type {
     // Single-character tokens.
     LEFT_PAREN,
@@ -27,11 +34,6 @@ pub enum token_type {
     LESS,
     LESS_EQUAL,
 
-    // Literals.
-    IDENTIFIER,
-    STRING,
-    NUMBER,
-
     // Keywords.
     AND,
     CLASS,
@@ -53,21 +55,21 @@ pub enum token_type {
     EOF,
 }
 
-pub struct Token<T> {
+pub struct Token {
     tok_type: token_type,
     lexeme: String,
-    literal: Option<T>, // Tokens might not have literals
+    literal: Option<token_type_literal>,
+    // Tokens might not have literals
     line: i32,
 }
 
-impl<T> Token<T> {
-    pub fn new(tok_type: token_type, lexeme: String, literal: Option<T>, line: i32) -> Token<T> {
+impl Token {
+    pub fn new(tok_type: token_type, lexeme: String, literal: Option<token_type_literal>, line: i32) -> Token {
         Token { tok_type, lexeme, literal, line }
     }
 }
 
-impl<T> ToString for Token<T>
-    where T: Debug {
+impl ToString for Token {
     fn to_string(&self) -> String {
         format!("{:?} {} {:?}", self.tok_type, self.lexeme, self.literal)
     }
