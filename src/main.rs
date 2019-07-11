@@ -1,7 +1,7 @@
 mod scanner;
 mod token;
-use crate::token::Token;
 
+use crate::token::Token;
 
 use clap::{App, Arg, ArgMatches};
 use std::fs::File;
@@ -11,7 +11,6 @@ use std::option::Option;
 
 //Add Trait for BufReader to read_to_string
 use std::io::prelude::{Read, Write};
-
 
 fn error(line_num: i8, message: &str) {
     report(line_num, "", message);

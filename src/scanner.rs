@@ -1,13 +1,13 @@
-use crate::token::{Token, token_type, token_type_literal};
+use crate::token::{token_type, token_type_literal, Token};
 
 #[derive(Debug)]
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
 
-    start_ptr_token : i32,
-    current_ptr : i32,
-    current_line : i32
+    start_ptr_token: i32,
+    current_ptr: i32,
+    current_line: i32,
 }
 
 impl ToString for Scanner {
@@ -18,25 +18,25 @@ impl ToString for Scanner {
 
 impl Scanner {
     pub fn new(the_source: String) -> Scanner {
-         Scanner {
-             source: the_source,
-             tokens: vec![],
-             start_ptr_token: 0,
-             current_ptr: 0,
-             current_line: 0
-         }
-     }
+        Scanner {
+            source: the_source,
+            tokens: vec![],
+            start_ptr_token: 0,
+            current_ptr: 0,
+            current_line: 0,
+        }
+    }
 
     /// Finished scanning the source when the current pointer is at the last character of the
     /// source
     fn at_the_end(&self) -> bool {
         self.current_ptr + 1 >= self.source.len() as i32
-     }
+    }
 
     /// Get a particular character from the source using an index
     fn get_char_from_source(&self) -> String {
         self.source[self.start_ptr_token as usize..self.current_ptr as usize].to_owned()
-     }
+    }
 
     /// Set start pointer = current pointer
     fn reset_start_ptr(self) -> Scanner {
@@ -47,29 +47,56 @@ impl Scanner {
     }
 
     /// This should return a new Scanner with the current pointer increased by 1
-    /// and the character that was just passed over
     fn advance(self) -> Scanner {
-         Scanner{
-             current_ptr: self.current_ptr+1,
-             ..self
-         }
-     }
+        Scanner {
+            current_ptr: self.current_ptr + 1,
+            ..self
+        }
+    }
 
     /// Return new Scanner with new token
-    fn add_token(self, tok_type: token_type, tok_type_literal: Option<token_type_literal>) -> Scanner {
+    fn add_token(
+        self,
+        tok_type: token_type,
+        tok_type_literal: Option<token_type_literal>,
+    ) -> Scanner {
         let text = &self.source[self.start_ptr_token as usize..self.current_ptr as usize];
         let mut current_tokens = self.tokens;
 
         let mut new_token_vec = match tok_type_literal {
-            Some(tok_type_literal) => vec!(Token::new(tok_type, text.to_string(), Some(tok_type_literal), self.current_line)),
-            None => vec!(Token::new(tok_type, text.to_string(), None, self.current_line)),
+            Some(tok_type_literal) => vec![Token::new(
+                tok_type,
+                text.to_string(),
+                Some(tok_type_literal),
+                self.current_line,
+            )],
+            None => vec![Token::new(
+                tok_type,
+                text.to_string(),
+                None,
+                self.current_line,
+            )],
         };
 
         current_tokens.append(&mut new_token_vec);
-        Scanner { tokens: current_tokens, ..self }
+        Scanner {
+            tokens: current_tokens,
+            ..self
+        }
     }
 
- }
+    /// PreCondition: start and current pointers are the same
+    fn scan_token(self) -> Scanner {
+        let scanner = self.advance();
+        let c = scanner.get_char_from_source();
+
+        match c.as_str() {
+            "(" => scanner.add_token(token_type::LEFT_PAREN, None),
+            ")" => scanner.add_token(token_type::RIGHT_PAREN, None),
+            _ => scanner,
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -86,7 +113,23 @@ mod tests {
         let tok_str_1: &Token = scanner.tokens.get(0).unwrap();
         let tok_str_2: &Token = scanner.tokens.get(1).unwrap();
 
-        println!("tok_str: {:?}", tok_str_1);
+        println!("Tokens: {:?}", scanner.tokens);
+        assert_eq!(scanner.current_ptr, 2);
+        assert_eq!(tok_str_1.lexeme, "(");
+        assert_eq!(tok_str_2.lexeme, ")");
+    }
+
+    #[test]
+    fn test_scan_tokens() {
+        let scanner = Scanner::new("()".to_string())
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token();
+
+        let tok_str_1: &Token = scanner.tokens.get(0).unwrap();
+        let tok_str_2: &Token = scanner.tokens.get(1).unwrap();
+
+        println!("Tokens: {:?}", scanner.tokens);
         assert_eq!(scanner.current_ptr, 2);
         assert_eq!(tok_str_1.lexeme, "(");
         assert_eq!(tok_str_2.lexeme, ")");

@@ -65,8 +65,18 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(tok_type: token_type, lexeme: String, literal: Option<token_type_literal>, line: i32) -> Token {
-        Token { tok_type, lexeme, literal, line }
+    pub fn new(
+        tok_type: token_type,
+        lexeme: String,
+        literal: Option<token_type_literal>,
+        line: i32,
+    ) -> Token {
+        Token {
+            tok_type,
+            lexeme,
+            literal,
+            line,
+        }
     }
 }
 
@@ -75,4 +85,3 @@ impl ToString for Token {
         format!("{:?} {} {:?}", self.tok_type, self.lexeme, self.literal)
     }
 }
-
