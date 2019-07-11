@@ -55,9 +55,10 @@ pub enum token_type {
     EOF,
 }
 
+#[derive(Debug)]
 pub struct Token {
     tok_type: token_type,
-    lexeme: String,
+    pub lexeme: String,
     literal: Option<token_type_literal>,
     // Tokens might not have literals
     line: i32,
