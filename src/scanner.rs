@@ -1,3 +1,4 @@
+use crate::token::token_type::FALSE;
 use crate::token::{token_type, token_type_literal, Token};
 
 #[derive(Debug)]
@@ -54,6 +55,18 @@ impl Scanner {
         }
     }
 
+    /// Check if next token will match expected character
+    fn check_ahead(self, expected: char) -> bool {
+        if self.at_the_end() {
+            false
+        } else {
+            if expected != self.get_char_from_source() {
+                false
+            }
+            true
+        }
+    }
+
     /// Return new Scanner with new token
     fn add_token(
         self,
@@ -93,6 +106,13 @@ impl Scanner {
         match c.as_str() {
             "(" => scanner.add_token(token_type::LEFT_PAREN, None),
             ")" => scanner.add_token(token_type::RIGHT_PAREN, None),
+            "{" => scanner.add_token(token_type::RIGHT_BRACE, None),
+            "}" => scanner.add_token(token_type::LEFT_BRACE, None),
+            "." => scanner.add_token(token_type::DOT, None),
+            "-" => scanner.add_token(token_type::MINUS, None),
+            "+" => scanner.add_token(token_type::PLUS, None),
+            ";" => scanner.add_token(token_type::SEMICOLON, None),
+            "*" => scanner.add_token(token_type::STAR, None),
             _ => scanner,
         }
     }
@@ -120,18 +140,37 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_tokens() {
-        let scanner = Scanner::new("()".to_string())
+    fn test_scan_single_character_tokens() {
+        let scanner = Scanner::new("()}{;*+--+".to_string())
             .scan_token()
             .reset_start_ptr()
-            .scan_token();
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr();
 
-        let tok_str_1: &Token = scanner.tokens.get(0).unwrap();
-        let tok_str_2: &Token = scanner.tokens.get(1).unwrap();
+        let tok_str_beginning: &Token = scanner.tokens.get(0).unwrap();
+        let tok_str_middle: &Token = scanner.tokens.get(4).unwrap();
+        let tok_str_end: &Token = scanner.tokens.get(9).unwrap();
 
         println!("Tokens: {:?}", scanner.tokens);
-        assert_eq!(scanner.current_ptr, 2);
-        assert_eq!(tok_str_1.lexeme, "(");
-        assert_eq!(tok_str_2.lexeme, ")");
+        assert_eq!(scanner.current_ptr, 10);
+        assert_eq!(tok_str_beginning.lexeme, "(");
+        assert_eq!(tok_str_middle.lexeme, ";");
+        assert_eq!(tok_str_end.lexeme, "+");
     }
 }
