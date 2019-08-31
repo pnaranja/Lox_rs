@@ -1,5 +1,6 @@
 mod scanner;
 mod token;
+mod error;
 
 use crate::token::Token;
 

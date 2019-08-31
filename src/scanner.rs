@@ -1,5 +1,6 @@
 use crate::token::token_type::FALSE;
 use crate::token::{token_type, token_type_literal, Token};
+use crate::error::report;
 
 #[derive(Debug)]
 pub struct Scanner {
@@ -56,13 +57,11 @@ impl Scanner {
     }
 
     /// Check if next token will match expected character
-    fn check_ahead(self, expected: char) -> bool {
-        if self.at_the_end() {
+    fn check_ahead(self, expected: String) -> bool {
+        if self.at_the_end() || expected !=self.get_char_from_source() 
+        {
             false
         } else {
-            if expected != self.get_char_from_source() {
-                false
-            }
             true
         }
     }
@@ -101,6 +100,7 @@ impl Scanner {
     /// PreCondition: start and current pointers are the same
     fn scan_token(self) -> Scanner {
         let scanner = self.advance();
+        let current_line = scanner.current_line;
         let c = scanner.get_char_from_source();
 
         match c.as_str() {
@@ -113,7 +113,7 @@ impl Scanner {
             "+" => scanner.add_token(token_type::PLUS, None),
             ";" => scanner.add_token(token_type::SEMICOLON, None),
             "*" => scanner.add_token(token_type::STAR, None),
-            _ => scanner,
+            _ => {report(current_line as i8, format!("Unknown token: {}", &c)); scanner},
         }
     }
 }
@@ -133,10 +133,31 @@ mod tests {
         let tok_str_1: &Token = scanner.tokens.get(0).unwrap();
         let tok_str_2: &Token = scanner.tokens.get(1).unwrap();
 
-        println!("Tokens: {:?}", scanner.tokens);
+        println!("test_add_tokens: Tokens: {:?}\n", scanner.tokens);
         assert_eq!(scanner.current_ptr, 2);
         assert_eq!(tok_str_1.lexeme, "(");
         assert_eq!(tok_str_2.lexeme, ")");
+    }
+
+    #[test]
+    fn test_bad_single_char_tokens(){
+        let scanner = Scanner::new("(){}!^".to_string())
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr();
+
+        let mut iter = scanner.tokens.iter();
+        assert_eq!(iter.any(|x| x.lexeme == "!".to_owned() || x.lexeme == "^".to_owned()), false);
+        println!("BAD Tokens??: {:?}\n", scanner.tokens);
     }
 
     #[test]
@@ -167,7 +188,7 @@ mod tests {
         let tok_str_middle: &Token = scanner.tokens.get(4).unwrap();
         let tok_str_end: &Token = scanner.tokens.get(9).unwrap();
 
-        println!("Tokens: {:?}", scanner.tokens);
+        println!("Good Tokens: {:?}", scanner.tokens);
         assert_eq!(scanner.current_ptr, 10);
         assert_eq!(tok_str_beginning.lexeme, "(");
         assert_eq!(tok_str_middle.lexeme, ";");
