@@ -1,6 +1,6 @@
+use crate::error::report;
 use crate::token::token_type::FALSE;
 use crate::token::{token_type, token_type_literal, Token};
-use crate::error::report;
 
 #[derive(Debug)]
 pub struct Scanner {
@@ -57,9 +57,9 @@ impl Scanner {
     }
 
     /// Check if next token will match expected character
+    /// This assumes the current pointer has already advanced to the next token
     fn check_ahead(self, expected: String) -> bool {
-        if self.at_the_end() || expected !=self.get_char_from_source() 
-        {
+        if !expected.eq(&self.get_char_from_source()) {
             false
         } else {
             true
@@ -72,7 +72,7 @@ impl Scanner {
         tok_type: token_type,
         tok_type_literal: Option<token_type_literal>,
     ) -> Scanner {
-        let text = &self.source[self.start_ptr_token as usize..self.current_ptr as usize];
+        let text = self.get_char_from_source();
         let mut current_tokens = self.tokens;
 
         let mut new_token_vec = match tok_type_literal {
@@ -113,7 +113,10 @@ impl Scanner {
             "+" => scanner.add_token(token_type::PLUS, None),
             ";" => scanner.add_token(token_type::SEMICOLON, None),
             "*" => scanner.add_token(token_type::STAR, None),
-            _ => {report(current_line as i8, format!("Unknown token: {}", &c)); scanner},
+            _ => {
+                report(current_line as i8, format!("Unknown token: {}", &c));
+                scanner
+            }
         }
     }
 }
@@ -121,6 +124,15 @@ impl Scanner {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_check_ahead() {
+        let scanner = Scanner::new("()".to_string())
+            .scan_token()
+            .reset_start_ptr()
+            .advance();
+        assert_eq!(scanner.check_ahead(String::from(")")), true);
+    }
 
     #[test]
     fn test_add_tokens() {
@@ -140,7 +152,7 @@ mod tests {
     }
 
     #[test]
-    fn test_bad_single_char_tokens(){
+    fn test_bad_single_char_tokens() {
         let scanner = Scanner::new("(){}!^".to_string())
             .scan_token()
             .reset_start_ptr()
@@ -156,7 +168,10 @@ mod tests {
             .reset_start_ptr();
 
         let mut iter = scanner.tokens.iter();
-        assert_eq!(iter.any(|x| x.lexeme == "!".to_owned() || x.lexeme == "^".to_owned()), false);
+        assert_eq!(
+            iter.any(|x| x.lexeme == "!".to_owned() || x.lexeme == "^".to_owned()),
+            false
+        );
         println!("BAD Tokens??: {:?}\n", scanner.tokens);
     }
 
