@@ -58,7 +58,7 @@ impl Scanner {
 
     /// Check if next token will match expected character
     /// This assumes the current pointer has already advanced to the next token
-    fn check_ahead(self, expected: String) -> bool {
+    fn check_ahead(&self, expected: String) -> bool {
         if !expected.eq(&self.get_char_from_source()) {
             false
         } else {
@@ -113,6 +113,38 @@ impl Scanner {
             "+" => scanner.add_token(token_type::PLUS, None),
             ";" => scanner.add_token(token_type::SEMICOLON, None),
             "*" => scanner.add_token(token_type::STAR, None),
+
+            "!" => {
+                if scanner.check_ahead(String::from("=")) {
+                    scanner.add_token(token_type::BANG_EQUAL, None)
+                } else {
+                    scanner.add_token(token_type::BANG, None)
+                }
+            }
+
+            "=" => {
+                if scanner.check_ahead(String::from("=")) {
+                    scanner.add_token(token_type::EQUAL_EQUAL, None)
+                } else {
+                    scanner.add_token(token_type::EQUAL, None)
+                }
+            }
+
+            "<" => {
+                if scanner.check_ahead(String::from("=")) {
+                    scanner.add_token(token_type::LESS_EQUAL, None)
+                } else {
+                    scanner.add_token(token_type::LESS, None)
+                }
+            }
+
+            ">" => {
+                if scanner.check_ahead(String::from("=")) {
+                    scanner.add_token(token_type::GREATER_EQUAL, None)
+                } else {
+                    scanner.add_token(token_type::GREATER, None)
+                }
+            }
             _ => {
                 report(current_line as i8, format!("Unknown token: {}", &c));
                 scanner
@@ -135,6 +167,34 @@ mod tests {
     }
 
     #[test]
+    fn test_check_double_tokens() {
+        let scanner = Scanner::new("!=.==.<=.>=".to_string())
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr()
+            .scan_token()
+            .reset_start_ptr();
+        println!("test_check_double_tokens: {:?}", scanner.tokens)
+    }
+
+    #[test]
     fn test_add_tokens() {
         let scanner = Scanner::new("()".to_string()).advance();
 
@@ -145,7 +205,6 @@ mod tests {
         let tok_str_1: &Token = scanner.tokens.get(0).unwrap();
         let tok_str_2: &Token = scanner.tokens.get(1).unwrap();
 
-        println!("test_add_tokens: Tokens: {:?}\n", scanner.tokens);
         assert_eq!(scanner.current_ptr, 2);
         assert_eq!(tok_str_1.lexeme, "(");
         assert_eq!(tok_str_2.lexeme, ")");
@@ -153,7 +212,7 @@ mod tests {
 
     #[test]
     fn test_bad_single_char_tokens() {
-        let scanner = Scanner::new("(){}!^".to_string())
+        let scanner = Scanner::new("(){}@^".to_string())
             .scan_token()
             .reset_start_ptr()
             .scan_token()
@@ -169,10 +228,9 @@ mod tests {
 
         let mut iter = scanner.tokens.iter();
         assert_eq!(
-            iter.any(|x| x.lexeme == "!".to_owned() || x.lexeme == "^".to_owned()),
+            iter.any(|x| x.lexeme == String::from("@") || x.lexeme == String::from("^")),
             false
         );
-        println!("BAD Tokens??: {:?}\n", scanner.tokens);
     }
 
     #[test]
@@ -203,7 +261,6 @@ mod tests {
         let tok_str_middle: &Token = scanner.tokens.get(4).unwrap();
         let tok_str_end: &Token = scanner.tokens.get(9).unwrap();
 
-        println!("Good Tokens: {:?}", scanner.tokens);
         assert_eq!(scanner.current_ptr, 10);
         assert_eq!(tok_str_beginning.lexeme, "(");
         assert_eq!(tok_str_middle.lexeme, ";");
